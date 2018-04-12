@@ -2,13 +2,10 @@
 
 namespace pg
 {
-  class Body
+  class World
   {
   public:
 
 
-  private:
-
-    float m_mass;
   };
 }
