@@ -17,6 +17,7 @@ namespace pg
     , m_targetPosition()
     , m_targetOrientation(0.f)
     , m_mass(mass)
+    , m_gravityScale(1.f, 1.f)
     , m_force()
     , m_velocity()
     , m_angularVelocity(0.f)
@@ -179,6 +180,27 @@ namespace pg
     ));
   }
 
+  Body & Body::setGravityScale(const gpm::Vector2F & gravityScale)
+  {
+    m_gravityScale = gravityScale;
+    return *this;
+  }
+
+  Body & Body::setGravityScale(const float gravityScale)
+  {
+    return setGravityScale(gpm::Vector2F(gravityScale, gravityScale));
+  }
+
+  gpm::Vector2F Body::getGravityScale() const
+  {
+    return m_gravityScale;
+  }
+
+  void Body::applyGravity()
+  {
+    applyForce(getWorld()->getGravity() * getGravityScale());
+  }
+
   void Body::checkCollision(const Body & other)
   {
     if (!getAABB().intersects(other.getAABB())) {
@@ -193,6 +215,8 @@ namespace pg
     if (isStatic()) {
       return;
     }
+
+    applyGravity();
 
   #ifdef PG_PHYSICS_INTERPOLATION
     m_previousPosition = m_targetPosition;

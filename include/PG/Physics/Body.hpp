@@ -69,7 +69,15 @@ namespace pg
 
     gpm::RectF getAABB() const;
 
+    Body& setGravityScale(const gpm::Vector2F& gravityScale);
+
+    Body& setGravityScale(const float gravityScale);
+
+    gpm::Vector2F getGravityScale() const;
+
   private:
+
+    void applyGravity();
 
     void checkCollision(const Body& other);
 
@@ -92,6 +100,7 @@ namespace pg
     float m_targetOrientation;
 
     float m_mass;
+    gpm::Vector2F m_gravityScale;
     gpm::Vector2F m_force;
     gpm::Vector2F m_velocity;
     float m_angularVelocity;
