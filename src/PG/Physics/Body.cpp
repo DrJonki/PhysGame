@@ -1,13 +1,21 @@
 #include <PG/Physics/Body.hpp>
 #include <PG/Physics/Shape.hpp>
+#include <PG/Physics/World.hpp>
 #include <PG/Physics/Detail/Integrator.hpp>
+#include <cmath>
 
 namespace pg
 {
   Body::Body(const float mass, const Shape& shape)
     : m_shapeRef(shape)
-    , m_position()
-    , m_orientation(0.f)
+    , m_worldRef(nullptr)
+  #ifdef PG_PHYSICS_INTERPOLATION
+    , m_previousPosition()
+    , m_previousOrientation(0.f)
+    , m_interpolationAlpha(0.f)
+  #endif
+    , m_targetPosition()
+    , m_targetOrientation(0.f)
     , m_mass(mass)
     , m_force()
     , m_velocity()
@@ -16,25 +24,48 @@ namespace pg
     , m_elasticity(0.f)
   {}
 
+  Body::~Body()
+  {
+    if (getWorld()) {
+      getWorld()->removeBody(*this);
+    }
+  }
+
   gpm::Vector2F Body::getPosition() const
   {
-    return m_position;
+  #ifdef PG_PHYSICS_INTERPOLATION
+    return m_previousPosition + m_interpolationAlpha * (m_targetPosition - m_previousPosition);
+  #else
+    return m_targetPosition;
+  #endif
   }
 
   Body & Body::setPosition(const gpm::Vector2F & position)
   {
-    m_position = position;
+  #ifdef PG_PHYSICS_INTERPOLATION
+    m_previousPosition = position;
+  #endif
+
+    m_targetPosition = position;
     return *this;
   }
 
   float Body::getOrientation() const
   {
-    return m_orientation;
+  #ifdef PG_PHYSICS_INTERPOLATION
+    return m_previousOrientation + m_interpolationAlpha * (m_targetOrientation - m_previousOrientation);
+  #endif
+
+    return m_targetOrientation;
   }
 
   Body & Body::setOrientation(const float orientation)
   {
-    m_orientation = orientation;
+  #ifdef PG_PHYSICS_INTERPOLATION
+    m_previusOrientation = orientation;
+  #endif
+
+    m_targetOrientation = orientation;
     return *this;
   }
 
@@ -121,13 +152,65 @@ namespace pg
     return 1.f / getInertia();
   }
 
-  void Body::step(const float dt)
+  bool Body::isStatic() const
   {
-    m_position = integrate(m_position, dt, m_velocity);
-    m_orientation = integrate(m_orientation, dt, m_angularVelocity);
-    m_velocity = integrate(m_velocity, dt, getInverseMass() * getTotalForce());
-    m_angularVelocity = integrate(m_angularVelocity, dt, getInverseInertia() * getTotalTorque());
+    return getMass() <= 0.f;
+  }
+
+  World * Body::getWorld()
+  {
+    return m_worldRef;
+  }
+
+  const World * Body::getWorld() const
+  {
+    return m_worldRef;
+  }
+
+  gpm::RectF Body::getAABB() const
+  {
+    const auto& pos = m_targetPosition;
+    const auto& rot = m_targetOrientation;
+
+    return m_shapeRef.getAABB(gpm::Matrix3x3F(
+      std::cos(rot), -std::sin(rot), pos.x,
+      std::sin(rot),  std::cos(rot), pos.y,
+      0.f,            0.f,           1.f
+    ));
+  }
+
+  void Body::checkCollision(const Body & other)
+  {
+    if (!getAABB().intersects(other.getAABB())) {
+      return;
+    }
+
+
+  }
+
+  void Body::step(const float timestep)
+  {
+    if (isStatic()) {
+      return;
+    }
+
+  #ifdef PG_PHYSICS_INTERPOLATION
+    m_previousPosition = m_targetPosition;
+    m_previousOrientation = m_targetOrientation;
+  #endif
+
+    m_targetPosition = integrate(m_targetPosition, timestep, m_velocity);
+    m_targetOrientation = integrate(m_targetOrientation, timestep, m_angularVelocity);
+    m_velocity = integrate(m_velocity, timestep, getInverseMass() * getTotalForce());
+    m_angularVelocity = integrate(m_angularVelocity, timestep, getInverseInertia() * getTotalTorque());
 
     clearForces();
+  }
+
+  void Body::interpolate(const float alpha)
+  {
+  #ifdef PG_PHYSICS_INTERPOLATION
+    m_interpolationAlpha = alpha;
+  #endif
   }
 }

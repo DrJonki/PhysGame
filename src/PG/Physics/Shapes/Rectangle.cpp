@@ -18,6 +18,6 @@ namespace pg
 
   gpm::RectF RectangleShape::getLocalAABB() const
   {
-    return gpm::RectF(gpm::Vector2F(), m_size.x);
+    return gpm::RectF(gpm::Vector2F(), m_size);
   }
 }

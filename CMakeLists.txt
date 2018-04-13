@@ -23,4 +23,10 @@ elseif (PG_INTEGRATOR MATCHES "Heun")
   add_definitions(-DPG_INTEGRATOR_HEUN)
 endif()
 
+pg_set_option(PG_PHYSICS_INTERPOLATION OFF BOOL "Use interpolation for rigidbody position and orientation")
+
+if (PG_PHYSICS_INTERPOLATION)
+  add_definitions(-DPG_PHYSICS_INTERPOLATION)
+endif()
+
 add_subdirectory(src)

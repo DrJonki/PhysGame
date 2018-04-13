@@ -1,10 +1,12 @@
 #pragma once
 
 #include <gpm/vector.hpp>
+#include <gpm/rectangle.hpp>
 
 namespace pg
 {
   class Shape;
+  class World;
 
   class Body
   {
@@ -12,15 +14,14 @@ namespace pg
 
   public:
 
-    enum class Type
-    {
-      Static,
-      Dynamic,
-    };
-
-  public:
-
+    /// \brief Body constructor
+    ///
+    /// \param mass Mass of this body. Pass <=0 to create a static body.
+    /// \param shape The collision shape to use.
+    ///
     Body(const float mass, const Shape& shape);
+
+    ~Body();
 
     gpm::Vector2F getPosition() const;
 
@@ -60,15 +61,36 @@ namespace pg
 
     float getInverseInertia() const;
 
+    bool isStatic() const;
+
+    World* getWorld();
+
+    const World* getWorld() const;
+
+    gpm::RectF getAABB() const;
+
   private:
 
-    void step(const float dt);
+    void checkCollision(const Body& other);
+
+    void step(const float timestep);
+
+    void interpolate(const float alpha);
 
   private:
 
     const Shape& m_shapeRef;
-    gpm::Vector2F m_position;
-    float m_orientation;
+    World* m_worldRef;
+
+  #ifdef PG_PHYSICS_INTERPOLATION
+    gpm::Vector2F m_previousPosition;
+    float m_previousOrientation;
+    float m_interpolationAlpha;
+  #endif
+
+    gpm::Vector2F m_targetPosition;
+    float m_targetOrientation;
+
     float m_mass;
     gpm::Vector2F m_force;
     gpm::Vector2F m_velocity;

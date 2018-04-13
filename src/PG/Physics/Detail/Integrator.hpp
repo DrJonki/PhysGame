@@ -4,8 +4,8 @@ namespace pg
 {
   namespace detail
   {
-    template<typename T, typename Time, typename F, typename ... Args>
-    inline T integrateEuler(const T& y, const Time dx, F f, const Args&... args)
+    template<typename Time, typename F, typename Y, typename ... Args>
+    inline Y integrateEuler(const Y& y, const Time dx, F f, const Args&... args)
     {
       return y + f(args...) * dx;
     }
@@ -13,32 +13,41 @@ namespace pg
 
 #if defined(PG_INTEGRATOR_RUNGE_KUTTA_POW4)
 
-  #error "Runge-Kutta integrator not implemented"
+  template<typename Time, typename F, typename Y>
+  inline Y integrate(const Y& y, const Time dx, F f, const Y& x)
+  {
+    const auto k0 = f(x);
+    const auto k1 = f(x + k0 / 2 * dx);
+    const auto k2 = f(x + k1 / 2 * dx);
+    const auto k3 = f(x + k2 * dx);
+
+    return y + (dx / 6) * (k0 + k1 + k2 + k3);
+  }
 
 #elif defined(PG_INTEGRATOR_HEUN)
 
-  template<typename Y, typename Time, typename F>
-  inline Y integrate(const Y& yn, const Time dx, F f, const Y& x)
+  template<typename Time, typename F, typename Y>
+  inline Y integrate(const Y& y, const Time dx, F f, const Y& x)
   {
-    return yn + (1 / 2) * (f(x) + f(detail::integrateEuler(y, dx, [](const Y& x) {
+    return y + (1 / 2) * (f(x) + f(detail::integrateEuler(y, dx, [](const Y& x) {
       return x;
     }, x))) * dx;
   }
 
 #else
 
-  template<typename Y, typename Time, typename F, typename ... Args>
-  inline Y integrate(const Y& yn, const Time dx, F f, const Args&... args)
+  template<typename Time, typename F, typename Y, typename ... Args>
+  inline Y integrate(const Y& y, const Time dx, F f, const Args&... args)
   {
-    return detail::integrateEuler(yn, dx, f, args...);
+    return detail::integrateEuler(y, dx, f, args...);
   }
 
 #endif
 
-  template<typename Y, typename Time>
-  inline Y integrate(const Y& yn, const Time dx, const Y& x)
+  template<typename Time, typename Y>
+  inline Y integrate(const Y& y, const Time dx, const Y& x)
   {
-    return integrate(yn, dx, [](const Y& x) {
+    return integrate(y, dx, [](const Y& x) {
       return x;
     }, x);
   }
