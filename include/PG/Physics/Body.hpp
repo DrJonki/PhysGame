@@ -85,7 +85,7 @@ namespace pg
 
     void applyGravity();
 
-    void checkCollision(const Body& other);
+    void checkCollision(Body& other);
 
     void step(const float timestep);
 

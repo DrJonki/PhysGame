@@ -2,6 +2,7 @@
 #include <PG/Physics/Shape.hpp>
 #include <PG/Physics/World.hpp>
 #include <PG/Physics/Detail/Integrator.hpp>
+#include <PG/Physics/Detail/CollisionAlgorithms.hpp>
 #include <cmath>
 #include <cassert>
 
@@ -225,13 +226,17 @@ namespace pg
     applyForce(getWorld()->getGravity() * getGravityScale());
   }
 
-  void Body::checkCollision(const Body & other)
+  void Body::checkCollision(Body & other)
   {
+    if (getShape() == nullptr || other.getShape() == nullptr) {
+      return;
+    }
+
     if (!getAABB().intersects(other.getAABB())) {
       return;
     }
 
-
+    detail::collide(*getShape(), *other.getShape());
   }
 
   void Body::step(const float timestep)

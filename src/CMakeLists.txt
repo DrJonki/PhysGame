@@ -3,11 +3,17 @@ include(ExternalProject)
 set(INCDIR ${CMAKE_SOURCE_DIR}/include/PG)
 set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/PG)
 
+
+
 set(SRC_PHYS
 
   ${INCDIR}/Physics/Body.hpp
   ${SRCDIR}/Physics/Body.cpp
+  
+  ${INCDIR}/Physics/CollisionInfo.hpp
 
+  ${SRCDIR}/Physics/Detail/CollisionAlgorithms.hpp
+  ${SRCDIR}/Physics/Detail/CollisionAlgorithms.cpp
   ${SRCDIR}/Physics/Detail/Integrator.hpp
 
   ${INCDIR}/Physics/Shape.hpp
@@ -23,6 +29,9 @@ set(SRC_PHYS_SHAPES
   ${INCDIR}/Physics/Shapes/Circle.hpp
   ${SRCDIR}/Physics/Shapes/Circle.cpp
 
+  ${INCDIR}/Physics/Shapes/LineSegment.hpp
+  ${SRCDIR}/Physics/Shapes/LineSegment.cpp
+
   ${INCDIR}/Physics/Shapes/Rectangle.hpp
   ${SRCDIR}/Physics/Shapes/Rectangle.cpp
 )
@@ -36,6 +45,10 @@ set(SRC_GAME
 
   ${INCDIR}/Game/Entity.hpp
   ${SRCDIR}/Game/Entity.cpp
+
+  ${INCDIR}/Game/Randomizer.hpp
+  ${INCDIR}/Game/Randomizer.inl
+  ${SRCDIR}/Game/Randomizer.cpp
 
   ${INCDIR}/Game/Scene.hpp
   ${SRCDIR}/Game/Scene.cpp
@@ -99,6 +112,7 @@ externalproject_get_property(SFML SOURCE_DIR)
 
 include_directories(${SOURCE_DIR}/include)
 add_definitions(-DSFML_STATIC)
+add_dependencies(PG GPM SFML)
 
 set(CMK_SLP ${CMAKE_STATIC_LIBRARY_PREFIX})
 set(CMK_SLS ${CMAKE_STATIC_LIBRARY_SUFFIX})

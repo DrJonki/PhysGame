@@ -17,11 +17,11 @@ namespace pg
   inline Y integrate(const Y& y, const Time dx, F f, const Y& x)
   {
     const auto k0 = f(x);
-    const auto k1 = f(x + k0 / 2 * dx);
-    const auto k2 = f(x + k1 / 2 * dx);
+    const auto k1 = f(x + k0 / 2.f * dx);
+    const auto k2 = f(x + k1 / 2.f * dx);
     const auto k3 = f(x + k2 * dx);
 
-    return y + (dx / 6) * (k0 + k1 + k2 + k3);
+    return y + (dx / 6.f) * (k0 + k1 + k2 + k3);
   }
 
 #elif defined(PG_INTEGRATOR_HEUN)
@@ -29,7 +29,7 @@ namespace pg
   template<typename Time, typename F, typename Y>
   inline Y integrate(const Y& y, const Time dx, F f, const Y& x)
   {
-    return y + (1 / 2) * (f(x) + f(detail::integrateEuler(y, dx, [](const Y& x) {
+    return y + (1.f / 2.f) * (f(x) + f(detail::integrateEuler(x, dx, [](const Y& x) {
       return x;
     }, x))) * dx;
   }

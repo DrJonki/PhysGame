@@ -1,18 +1,15 @@
 #pragma once
 
 #include <PG/Physics/Shape.hpp>
+#include <gpm/vector.hpp>
 
 namespace pg
 {
-  class CircleShape : public Shape
+  class LineSegmentShape : public Shape
   {
   public:
 
-    CircleShape(const float radius);
-
-    ~CircleShape() override;
-
-    float getRadius() const;
+    LineSegmentShape(const gpm::Vector2F& start, const gpm::Vector2F& end);
 
     float getInertia(const float mass) const override;
 
@@ -20,6 +17,7 @@ namespace pg
 
   private:
 
-    float m_radius;
+    gpm::Vector2F m_start;
+    gpm::Vector2F m_end;
   };
 }

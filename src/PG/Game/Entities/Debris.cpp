@@ -7,17 +7,18 @@
 
 namespace pg
 {
-  DebrisEntity::DebrisEntity(World & world)
+  DebrisEntity::DebrisEntity(World & world, const gpm::Vector2F& size)
     : Entity()
     , Body(1.f)
-    , m_drawable(sf::Vector2f(40, 40))
+    , m_bodyShape()
+    , m_drawable(sf::Vector2f(size.x, size.y))
   {
-    static RectangleShape shape = RectangleShape(40, 40);
+    m_bodyShape = std::make_unique<RectangleShape>(size);
 
-    setPosition(gpm::Vector2F(200, -600));
-
-    setShape(&shape);
+    setShape(m_bodyShape.get());
     world.addBody(*this);
+
+    m_drawable.setOrigin(sf::Vector2f(size.x / 2, size.y / 2));
   }
 
   void DebrisEntity::update(const float)
@@ -25,7 +26,7 @@ namespace pg
     const auto currentPos = Body::getPosition();
     const auto currentRot = Body::getOrientation();
 
-    m_drawable.setPosition(currentPos.x, currentPos.y);
+    m_drawable.setPosition(currentPos.x, -currentPos.y);
     m_drawable.setRotation(gpm::r2d(currentRot));
   }
 

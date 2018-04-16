@@ -8,7 +8,7 @@ namespace pg
   Engine* Engine::ms_instance = nullptr;
 
   Engine::Engine()
-    : m_window()
+    : m_window(sf::VideoMode(600, 800), "PhysGame")
     , m_scenes()
     , m_running(true)
   {
@@ -16,10 +16,7 @@ namespace pg
 
     ms_instance = this;
 
-    const sf::Vector2u windowSize(600, 800);
-
-    m_window.create(sf::VideoMode(windowSize.x, windowSize.y), "PhysGame");
-    m_window.setView(sf::View(sf::Vector2f(windowSize.x / 2.f, -windowSize.y / 2.f), sf::Vector2f(windowSize)));
+    m_window.setVerticalSyncEnabled(true);
   }
 
   void Engine::exit()

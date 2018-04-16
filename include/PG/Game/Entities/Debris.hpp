@@ -3,6 +3,7 @@
 #include <PG/Game/Entity.hpp>
 #include <PG/Physics/Body.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <memory>
 
 namespace pg
 {
@@ -12,7 +13,7 @@ namespace pg
   {
   public:
 
-    DebrisEntity(World& world);
+    DebrisEntity(World& world, const gpm::Vector2F& size);
 
   private:
 
@@ -22,6 +23,7 @@ namespace pg
 
   private:
 
+    std::unique_ptr<Shape> m_bodyShape;
     sf::RectangleShape m_drawable;
   };
 }
