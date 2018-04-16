@@ -13,7 +13,7 @@ namespace pg
 
   float RectangleShape::getInertia(const float mass) const
   {
-    return (1 / 12) * mass * (std::pow(m_size.x, 2) + std::pow(m_size.y, 2));
+    return (1.f / 12.f) * mass * (std::pow(m_size.x, 2) + std::pow(m_size.y, 2));
   }
 
   gpm::RectF RectangleShape::getLocalAABB() const

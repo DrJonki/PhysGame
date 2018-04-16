@@ -1,4 +1,11 @@
+#include <PG/Game/Engine.hpp>
+#include <PG/Game/Scenes/Game.hpp>
+
 int main()
 {
-  return 0;
+  pg::Engine engine;
+
+  engine.pushScene(new pg::GameScene());
+
+  return engine();
 }

@@ -11,7 +11,7 @@ namespace pg
 
   float CircleShape::getInertia(const float mass) const
   {
-    return (1 / 2) * mass * m_radius;
+    return (1.f / 2.f) * mass * m_radius;
   }
 
   gpm::RectF CircleShape::getLocalAABB() const

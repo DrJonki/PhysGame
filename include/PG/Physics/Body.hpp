@@ -14,6 +14,8 @@ namespace pg
 
   public:
 
+    Body(const float mass);
+
     /// \brief Body constructor
     ///
     /// \param mass Mass of this body. Pass <=0 to create a static body.
@@ -75,6 +77,10 @@ namespace pg
 
     gpm::Vector2F getGravityScale() const;
 
+    Body& setShape(const Shape* shape);
+
+    const Shape* getShape() const;
+
   private:
 
     void applyGravity();
@@ -87,7 +93,7 @@ namespace pg
 
   private:
 
-    const Shape& m_shapeRef;
+    const Shape* m_shapeRef;
     World* m_worldRef;
 
   #ifdef PG_PHYSICS_INTERPOLATION

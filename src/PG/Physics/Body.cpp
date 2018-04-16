@@ -3,11 +3,12 @@
 #include <PG/Physics/World.hpp>
 #include <PG/Physics/Detail/Integrator.hpp>
 #include <cmath>
+#include <cassert>
 
 namespace pg
 {
-  Body::Body(const float mass, const Shape& shape)
-    : m_shapeRef(shape)
+  Body::Body(const float mass)
+    : m_shapeRef(nullptr)
     , m_worldRef(nullptr)
   #ifdef PG_PHYSICS_INTERPOLATION
     , m_previousPosition()
@@ -23,7 +24,15 @@ namespace pg
     , m_angularVelocity(0.f)
     , m_torque(0.f)
     , m_elasticity(0.f)
-  {}
+  {
+  }
+
+  Body::Body(const float mass, const Shape& shape)
+    : Body(mass)
+  {
+    m_shapeRef = &shape;
+    m_worldRef = nullptr;
+  }
 
   Body::~Body()
   {
@@ -63,7 +72,7 @@ namespace pg
   Body & Body::setOrientation(const float orientation)
   {
   #ifdef PG_PHYSICS_INTERPOLATION
-    m_previusOrientation = orientation;
+    m_previousOrientation = orientation;
   #endif
 
     m_targetOrientation = orientation;
@@ -145,7 +154,9 @@ namespace pg
 
   float Body::getInertia() const
   {
-    return m_shapeRef.getInertia(getMass());
+    assert(m_shapeRef != nullptr);
+
+    return m_shapeRef->getInertia(getMass());
   }
 
   float Body::getInverseInertia() const
@@ -170,10 +181,12 @@ namespace pg
 
   gpm::RectF Body::getAABB() const
   {
+    assert(m_shapeRef != nullptr);
+
     const auto& pos = m_targetPosition;
     const auto& rot = m_targetOrientation;
 
-    return m_shapeRef.getAABB(gpm::Matrix3x3F(
+    return m_shapeRef->getAABB(gpm::Matrix3x3F(
       std::cos(rot), -std::sin(rot), pos.x,
       std::sin(rot),  std::cos(rot), pos.y,
       0.f,            0.f,           1.f
@@ -196,6 +209,17 @@ namespace pg
     return m_gravityScale;
   }
 
+  Body & Body::setShape(const Shape * shape)
+  {
+    m_shapeRef = shape;
+    return *this;
+  }
+
+  const Shape * Body::getShape() const
+  {
+    return m_shapeRef;
+  }
+
   void Body::applyGravity()
   {
     applyForce(getWorld()->getGravity() * getGravityScale());
@@ -212,7 +236,7 @@ namespace pg
 
   void Body::step(const float timestep)
   {
-    if (isStatic()) {
+    if (isStatic() || m_shapeRef == nullptr) {
       return;
     }
 
@@ -223,10 +247,10 @@ namespace pg
     m_previousOrientation = m_targetOrientation;
   #endif
 
-    m_targetPosition = integrate(m_targetPosition, timestep, m_velocity);
-    m_targetOrientation = integrate(m_targetOrientation, timestep, m_angularVelocity);
-    m_velocity = integrate(m_velocity, timestep, getInverseMass() * getTotalForce());
-    m_angularVelocity = integrate(m_angularVelocity, timestep, getInverseInertia() * getTotalTorque());
+    m_targetPosition = integrate(m_targetPosition, timestep, getVelocity());
+    m_targetOrientation = integrate(m_targetOrientation, timestep, getAngularVelocity());
+    m_velocity = integrate(getVelocity(), timestep, getInverseMass() * getTotalForce());
+    m_angularVelocity = integrate(getAngularVelocity(), timestep, getInverseInertia() * getTotalTorque());
 
     clearForces();
   }

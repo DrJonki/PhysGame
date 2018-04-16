@@ -31,10 +31,38 @@ list(APPEND SRC_PHYS ${SRC_PHYS_SHAPES})
 
 set(SRC_GAME
 
-  ${INCDIR}/Game/Game.hpp
-  ${SRCDIR}/Game/Game.cpp
+  ${INCDIR}/Game/Engine.hpp
+  ${SRCDIR}/Game/Engine.cpp
+
+  ${INCDIR}/Game/Entity.hpp
+  ${SRCDIR}/Game/Entity.cpp
+
+  ${INCDIR}/Game/Scene.hpp
+  ${SRCDIR}/Game/Scene.cpp
 )
 source_group(Game FILES ${SRC_GAME})
+
+set(SRC_GAME_SCENES
+
+  ${INCDIR}/Game/Scenes/Game.hpp
+  ${SRCDIR}/Game/Scenes/Game.cpp
+)
+source_group("Game\\Scenes" FILES ${SRC_GAME_SCENES})
+list(APPEND SRC_GAME ${SRC_GAME_SCENES})
+
+set(SRC_GAME_ENTITIES
+
+  ${INCDIR}/Game/Entities/Debris.hpp
+  ${SRCDIR}/Game/Entities/Debris.cpp
+
+  ${INCDIR}/Game/Entities/Player.hpp
+  ${SRCDIR}/Game/Entities/Player.cpp
+
+  ${INCDIR}/Game/Entities/Shot.hpp
+  ${SRCDIR}/Game/Entities/Shot.cpp
+)
+source_group("Game\\Entities" FILES ${SRC_GAME_ENTITIES})
+list(APPEND SRC_GAME ${SRC_GAME_ENTITIES})
 
 include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR})
 add_executable(PG ${SRC_PHYS} ${SRC_GAME} ${SRCDIR}/main.cpp)
@@ -56,7 +84,7 @@ include_directories(${SOURCE_DIR}/include)
 # SFML
 externalproject_add(SFML
   GIT_REPOSITORY https://github.com/SFML/SFML.git
-  GIT_TAG 2.4.2
+  GIT_TAG 9da895d
 
   UPDATE_COMMAND ""
   PATCH_COMMAND ""

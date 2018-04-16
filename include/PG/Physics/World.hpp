@@ -19,7 +19,7 @@ namespace pg
     /// \param substeps How many timestep-sized substeps are allowed to catch up in the simulation? Pass 0 for infinite.
     /// \param timestep The length of the simulation time step. Constant value is recommended.
     ///
-    void step(const float dt, const std::size_t substeps = 5, const float timestep = 1.f / 60);
+    void step(const float dt, const std::size_t substeps = 1, const float timestep = 1.f / 60);
 
     World& setGravity(const gpm::Vector2F& gravity);
 
