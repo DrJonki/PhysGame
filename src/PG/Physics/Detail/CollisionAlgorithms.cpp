@@ -30,7 +30,17 @@ namespace pg
         }
 
 
-      })
+      }),
+
+      // Circle-LineSegment
+      std::make_pair(std::type_index(typeid(LineSegmentShape)), [](Body& b1, Body& b2) {
+
+      }),
+
+      // Circle-Rectangle
+      std::make_pair(std::type_index(typeid(RectangleShape)), [](Body& b1, Body& b2) {
+
+      }),
     })),
 
     // Rectangle-X
@@ -39,7 +49,12 @@ namespace pg
       // Rectangle-Rectangle
       std::make_pair(std::type_index(typeid(RectangleShape)), [](Body& b1, Body& b2) {
 
-      })
+      }),
+
+      // Rectangle-LineSegment
+      std::make_pair(std::type_index(typeid(RectangleShape)), [](Body& b1, Body& b2) {
+
+      }),
     }))
   };
 

@@ -93,6 +93,10 @@ namespace pg
 
   private:
 
+    virtual void onCollision(Body& other);
+
+  private:
+
     const Shape* m_shapeRef;
     World* m_worldRef;
 

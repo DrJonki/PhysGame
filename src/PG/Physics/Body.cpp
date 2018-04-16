@@ -25,8 +25,7 @@ namespace pg
     , m_angularVelocity(0.f)
     , m_torque(0.f)
     , m_elasticity(0.f)
-  {
-  }
+  {}
 
   Body::Body(const float mass, const Shape& shape)
     : Body(mass)
@@ -266,4 +265,7 @@ namespace pg
     m_interpolationAlpha = alpha;
   #endif
   }
+
+  void Body::onCollision(Body& other)
+  {}
 }

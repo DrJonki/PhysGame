@@ -3,8 +3,6 @@ include(ExternalProject)
 set(INCDIR ${CMAKE_SOURCE_DIR}/include/PG)
 set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/PG)
 
-
-
 set(SRC_PHYS
 
   ${INCDIR}/Physics/Body.hpp

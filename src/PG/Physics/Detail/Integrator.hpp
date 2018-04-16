@@ -17,9 +17,9 @@ namespace pg
   inline Y integrate(const Y& y, const Time dx, F f, const Y& x)
   {
     const auto k0 = f(x);
-    const auto k1 = f(x + k0 / 2.f * dx);
-    const auto k2 = f(x + k1 / 2.f * dx);
-    const auto k3 = f(x + k2 * dx);
+    const auto k1 = f(x + dx / 2.f * k0);
+    const auto k2 = f(x + dx / 2.f * k1);
+    const auto k3 = f(x + dx * k2);
 
     return y + (dx / 6.f) * (k0 + k1 + k2 + k3);
   }
