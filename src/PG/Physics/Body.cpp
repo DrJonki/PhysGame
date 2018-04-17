@@ -1,6 +1,7 @@
 #include <PG/Physics/Body.hpp>
 #include <PG/Physics/Shape.hpp>
 #include <PG/Physics/World.hpp>
+#include <PG/Physics/CollisionInfo.hpp>
 #include <PG/Physics/Detail/Integrator.hpp>
 #include <PG/Physics/Detail/CollisionAlgorithms.hpp>
 #include <cmath>
@@ -142,6 +143,12 @@ namespace pg
     return *this;
   }
 
+  Body & Body::setMass(const float mass)
+  {
+    m_mass = mass;
+    return *this;
+  }
+
   float Body::getMass() const
   {
     return m_mass;
@@ -220,6 +227,17 @@ namespace pg
     return m_shapeRef;
   }
 
+  gpm::Matrix3x3F Body::getTransform() const
+  {
+    const auto rot = m_targetOrientation;
+
+    return gpm::Matrix3x3F(
+      std::cos(rot), -std::sin(rot), m_targetPosition.x,
+      std::sin(rot),  std::cos(rot), m_targetPosition.y,
+      0.f,            0.f,           1.f
+    );
+  }
+
   void Body::applyGravity()
   {
     applyForce(getWorld()->getGravity() * getGravityScale());
@@ -235,7 +253,10 @@ namespace pg
       return;
     }
 
-    detail::collide(*getShape(), *other.getShape());
+    CollisionInfo info;
+    if (detail::collide(*this, other, info)) {
+      onCollision(other, info);
+    }
   }
 
   void Body::step(const float timestep)
@@ -266,6 +287,6 @@ namespace pg
   #endif
   }
 
-  void Body::onCollision(Body& other)
+  void Body::onCollision(Body& other, CollisionInfo& info)
   {}
 }

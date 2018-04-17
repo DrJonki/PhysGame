@@ -11,6 +11,6 @@ namespace pg
     gpm::Vector2F point;
     gpm::Vector2F normal;
 
-    Body& bodyB;
+    Body* bodyB;
   };
 }

@@ -2,11 +2,13 @@
 
 #include <gpm/vector.hpp>
 #include <gpm/rectangle.hpp>
+#include <gpm/matrix.hpp>
 
 namespace pg
 {
   class Shape;
   class World;
+  struct CollisionInfo;
 
   class Body
   {
@@ -55,6 +57,8 @@ namespace pg
     
     Body& setElasticity(const float elasticity);
 
+    Body& setMass(const float mass);
+
     float getMass() const;
 
     float getInverseMass() const;
@@ -81,6 +85,8 @@ namespace pg
 
     const Shape* getShape() const;
 
+    gpm::Matrix3x3F getTransform() const;
+
   private:
 
     void applyGravity();
@@ -93,7 +99,7 @@ namespace pg
 
   private:
 
-    virtual void onCollision(Body& other);
+    virtual void onCollision(Body& other, CollisionInfo& info);
 
   private:
 

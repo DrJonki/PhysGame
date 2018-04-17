@@ -24,7 +24,7 @@ namespace pg
 
     // Generate debris
     {
-      Randomizer rand;
+      /*Randomizer rand;
 
       for (int i = 0; i < 3; ++i) {
         auto& debris = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
@@ -35,8 +35,16 @@ namespace pg
         ));
         debris.setOrientation(rand(0.f, 2 * gpm::pi_f));
         debris.applyTorque(rand(-500.f, 500.f));
-      }
+      }*/
     }
+
+    auto& o1 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
+    o1.setOrientation(gpm::pi_f / 6.f);
+    o1.setPosition(gpm::Vector2F(levelSize.x / 2.f, levelSize.y - 2));
+
+    auto& o2 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
+    o2.setPosition(gpm::Vector2F(levelSize.x / 2.f, levelSize.y - 16));
+    o2.setMass(-1.f);
   }
 
   void GameScene::update(const float dt)

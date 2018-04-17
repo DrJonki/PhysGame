@@ -13,16 +13,16 @@ namespace pg
     const auto local = getLocalAABB();
 
     const auto tl = transform * gpm::Vector3F(
-      local.pos.x, local.getExtentY(), 1.f
+      local.pos.x, local.getExtentY(), 0.f
     );
     const auto bl = transform * gpm::Vector3F(
-      local.pos.x, local.pos.y, 1.f
+      local.pos.x, local.pos.y, 0.f
     );
     const auto tr = transform * gpm::Vector3F(
-      local.getExtentX(), local.getExtentY(), 1.f
+      local.getExtentX(), local.getExtentY(), 0.f
     );
     const auto br = transform * gpm::Vector3F(
-      local.getExtentX(), local.pos.y, 1.f
+      local.getExtentX(), local.pos.y, 0.f
     );
 
     const float left   = std::min({ tl.x, bl.x, tr.x, br.x });

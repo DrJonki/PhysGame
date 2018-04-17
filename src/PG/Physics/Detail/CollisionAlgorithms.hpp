@@ -5,9 +5,10 @@
 namespace pg
 {
   class Body;
+  struct CollisionInfo;
 
   namespace detail
   {
-    void collide(const Body& b1, const Body& b2);
+    bool collide(Body& b1, Body& b2, CollisionInfo& info);
   }
 }
