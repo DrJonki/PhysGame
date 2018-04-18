@@ -17,7 +17,7 @@ namespace pg
 
     virtual float getInertia(const float mass) const = 0;
 
-    gpm::RectF getAABB(const gpm::Matrix3x3F& transform) const;
+    gpm::RectF getAABB(const gpm::Vector2F& position, const float orientation) const;
 
   private:
 

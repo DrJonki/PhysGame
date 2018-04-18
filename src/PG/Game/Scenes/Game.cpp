@@ -40,7 +40,7 @@ namespace pg
 
     auto& o1 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
     o1.setOrientation(gpm::pi_f / 6.f);
-    o1.setPosition(gpm::Vector2F(levelSize.x / 2.f, levelSize.y - 2));
+    o1.setPosition(gpm::Vector2F(levelSize.x / 2.f - 1.f, levelSize.y - 2));
 
     auto& o2 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
     o2.setPosition(gpm::Vector2F(levelSize.x / 2.f, levelSize.y - 16));

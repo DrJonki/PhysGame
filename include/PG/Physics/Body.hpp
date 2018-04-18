@@ -47,9 +47,15 @@ namespace pg
 
     Body& applyForce(const gpm::Vector2F& force);
 
+    Body& applyImpulse(const gpm::Vector2F& impulse);
+
+    Body& applyImpulse(const gpm::Vector2F& impulse, const gpm::Vector2F& position);
+
     float getTotalTorque() const;
 
     Body& applyTorque(const float torque);
+
+    Body& applyTorqueImpulse(const float impulse);
 
     Body& clearForces();
 
@@ -91,7 +97,7 @@ namespace pg
 
     void applyGravity();
 
-    void checkCollision(Body& other);
+    bool checkCollision(Body& other, CollisionInfo& info);
 
     void step(const float timestep);
 

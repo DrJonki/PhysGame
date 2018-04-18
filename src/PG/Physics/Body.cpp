@@ -1,7 +1,6 @@
 #include <PG/Physics/Body.hpp>
 #include <PG/Physics/Shape.hpp>
 #include <PG/Physics/World.hpp>
-#include <PG/Physics/CollisionInfo.hpp>
 #include <PG/Physics/Detail/Integrator.hpp>
 #include <PG/Physics/Detail/CollisionAlgorithms.hpp>
 #include <cmath>
@@ -113,6 +112,18 @@ namespace pg
     return *this;
   }
 
+  Body & Body::applyImpulse(const gpm::Vector2F & impulse)
+  {
+    m_velocity += impulse * getInverseMass();
+    return *this;
+  }
+
+  Body & Body::applyImpulse(const gpm::Vector2F & impulse, const gpm::Vector2F & position)
+  {
+    // TODO
+    return *this;
+  }
+
   float Body::getTotalTorque() const
   {
     return m_torque;
@@ -121,6 +132,12 @@ namespace pg
   Body & Body::applyTorque(const float torque)
   {
     m_torque += torque;
+    return *this;
+  }
+
+  Body & Body::applyTorqueImpulse(const float impulse)
+  {
+    m_angularVelocity += getInverseInertia() * impulse;
     return *this;
   }
 
@@ -156,7 +173,7 @@ namespace pg
 
   float Body::getInverseMass() const
   {
-    return 1.f / getMass();
+    return isStatic() ? 0.f : 1.f / getMass();
   }
 
   float Body::getInertia() const
@@ -193,11 +210,7 @@ namespace pg
     const auto& pos = m_targetPosition;
     const auto& rot = m_targetOrientation;
 
-    return m_shapeRef->getAABB(gpm::Matrix3x3F(
-      std::cos(rot), -std::sin(rot), pos.x,
-      std::sin(rot),  std::cos(rot), pos.y,
-      0.f,            0.f,           1.f
-    ));
+    return m_shapeRef->getAABB(getPosition(), getOrientation());
   }
 
   Body & Body::setGravityScale(const gpm::Vector2F & gravityScale)
@@ -243,25 +256,22 @@ namespace pg
     applyForce(getWorld()->getGravity() * getGravityScale());
   }
 
-  void Body::checkCollision(Body & other)
+  bool Body::checkCollision(Body & other, CollisionInfo& info)
   {
     if (getShape() == nullptr || other.getShape() == nullptr) {
-      return;
+      return false;
     }
 
     if (!getAABB().intersects(other.getAABB())) {
-      return;
+      return false;
     }
 
-    CollisionInfo info;
-    if (detail::collide(*this, other, info)) {
-      onCollision(other, info);
-    }
+    return detail::collide(*this, other, info);
   }
 
   void Body::step(const float timestep)
   {
-    if (isStatic() || m_shapeRef == nullptr) {
+    if (isStatic() || getShape() == nullptr) {
       return;
     }
 
@@ -287,6 +297,6 @@ namespace pg
   #endif
   }
 
-  void Body::onCollision(Body& other, CollisionInfo& info)
+  void Body::onCollision(Body&, CollisionInfo&)
   {}
 }

@@ -13,6 +13,16 @@ namespace pg
 {
   typedef bool(*CollisionAlgorithm)(Body&, Body&, CollisionInfo&);
 
+  gpm::Vector2F findClosestPointOnSegment(const gpm::Vector2F& a, const gpm::Vector2F& b, const gpm::Vector2F& p)
+  {
+    const auto ab = b - a;
+    const auto ap = p - a;
+
+    const auto t = ap.getDotProduct(ab) / ab.getMagnitudeSquared();
+
+    return gpm::Vector2F(a.x + ab.x * t, a.y + ab.y * t);
+  }
+
   std::unordered_map<std::type_index, std::unordered_map<std::type_index, CollisionAlgorithm>> ns_algorithms = {
 
     // Circle-X
@@ -58,19 +68,25 @@ namespace pg
         auto& s1 = static_cast<const RectangleShape&>(*b1.getShape());
         auto& s2 = static_cast<const RectangleShape&>(*b2.getShape());
 
-        const auto s1points = s1.getVertices(b1.getTransform());
-        const auto s2points = s2.getVertices(b2.getTransform());
+        const auto s1points = s1.getVertices(b1.getPosition(), b1.getOrientation());
+        const auto s2points = s2.getVertices(b2.getPosition(), b2.getOrientation());
 
-        for (unsigned int i = 0; i < s2points.size(); ++i) {
-          const auto& a = s2points[i];
-          const auto ab = s2points[i == (s2points.size() - 1) ? 0 : i + 1] - a;
+        for (auto& p : s1points) {
+          for (unsigned int i = 0; i < 4; ++i) {
+            const auto& a = s2points[i];
+            const auto& b = s2points[i == 3 ? 0 : i + 1];
+            const auto ab = b - a;
+            const auto ap = p - a;
 
-          for (auto& p : s1points) {
-            if (ab.getCrossProduct(p - a).z >= 0) {
-              return false;
+            if (ab.getCrossProduct(ap).z >= 0) {
+              break;
             }
 
-            // p is inside 
+            if (i == 3) {
+              
+
+              return true;
+            }
           }
         }
 

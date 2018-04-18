@@ -8,22 +8,18 @@ namespace pg
   Shape::~Shape()
   {}
 
-  gpm::RectF Shape::getAABB(const gpm::Matrix3x3F& transform) const
+  gpm::RectF Shape::getAABB(const gpm::Vector2F& position, const float orientation) const
   {
     const auto local = getLocalAABB();
+    const auto mat = gpm::Matrix2x2F(
+      std::cos(orientation), -std::sin(orientation),
+      std::sin(orientation), std::cos(orientation)
+    );
 
-    const auto tl = transform * gpm::Vector3F(
-      local.pos.x, local.getExtentY(), 0.f
-    );
-    const auto bl = transform * gpm::Vector3F(
-      local.pos.x, local.pos.y, 0.f
-    );
-    const auto tr = transform * gpm::Vector3F(
-      local.getExtentX(), local.getExtentY(), 0.f
-    );
-    const auto br = transform * gpm::Vector3F(
-      local.getExtentX(), local.pos.y, 0.f
-    );
+    const auto tl = position + gpm::Vector2F(local.pos.x, local.getExtentY()) * mat;
+    const auto bl = position + gpm::Vector2F(local.pos.x, local.pos.y) * mat;
+    const auto tr = position + gpm::Vector2F(local.getExtentX(), local.getExtentY()) * mat;
+    const auto br = position + gpm::Vector2F(local.getExtentX(), local.pos.y) * mat;
 
     const float left   = std::min({ tl.x, bl.x, tr.x, br.x });
     const float right  = std::max({ tl.x, bl.x, tr.x, br.x });

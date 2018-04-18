@@ -18,7 +18,7 @@ namespace pg
 
     gpm::RectF getLocalAABB() const override;
 
-    std::array<gpm::Vector2F, 4> getVertices(const gpm::Matrix3x3F& transform) const;
+    std::array<gpm::Vector2F, 4> getVertices(const gpm::Vector2F& position, const float orientation) const;
 
   private:
 

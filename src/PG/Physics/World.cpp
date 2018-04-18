@@ -1,7 +1,19 @@
 #include <PG/Physics/World.hpp>
 #include <PG/Physics/Body.hpp>
+#include <PG/Physics/CollisionInfo.hpp>
 #include <cassert>
 #include <algorithm>
+#include <vector>
+
+namespace
+{
+  /*template<typename T>
+  inline void hash_combine(std::size_t& seed, const T& v)
+  {
+    std::hash<T> hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+  }*/
+}
 
 namespace pg
 {
@@ -70,12 +82,36 @@ namespace pg
     }
 
     // Check collisions
+    std::vector<CollisionInfo> pairs;
+    pairs.reserve(m_bodies.size());
+
+    CollisionInfo info;
+
     for (auto& i : m_bodies) {
       for (auto& j : m_bodies) {
-        if (i != j) {
-          i->checkCollision(*j);
+        if (i != j && i->checkCollision(*j, info)) {
+          pairs.push_back(info);
         }
       }
+    }
+
+    // Resolve collisions
+    for (auto& pair : pairs) {
+      const auto A = pair.bodyA;
+      const auto B = pair.bodyB;
+
+      const auto& p = pair.point;
+      const auto& n = pair.normal;
+
+      const auto vAP = p - A->getVelocity();
+      const auto vBP = p - B->getVelocity();
+      const auto vAB = vAP - vBP;
+
+      const auto e = A->getElasticity() * B->getElasticity();
+      const auto j = (-(1 + e) * vAB).getDotProduct(n) / n.getDotProduct(n * (A->getInverseMass() + B->getInverseMass()));
+
+      A->applyImpulse(j * n);
+      B->applyImpulse(-j * n);
     }
   }
 }
