@@ -2,7 +2,9 @@
 
 *Not really a game, just a minimal demo/experiment*
 
-[![video](http://img.youtube.com/vi/vp9pgplzYFk/0.jpg)](http://www.youtube.com/watch?v=vp9pgplzYFk "Physics Demo")
+***
+
+[![video](http://img.youtube.com/vi/vp9pgplzYFk/0.jpg)](http://www.youtube.com/watch?v=vp9pgplzYFk "Physics Demo")  
 *Click on the image to view the video*
 
 ### Physics Features
