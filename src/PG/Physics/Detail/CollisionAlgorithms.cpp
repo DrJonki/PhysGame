@@ -3,6 +3,7 @@
 #include <PG/Physics/Shapes/LineSegment.hpp>
 #include <PG/Physics/Shapes/Rectangle.hpp>
 #include <PG/Physics/Body.hpp>
+#include <PG/Physics/CollisionInfo.hpp>
 #include <typeindex>
 #include <unordered_map>
 #include <cmath>
@@ -13,11 +14,9 @@ namespace pg
 {
   typedef bool(*CollisionAlgorithm)(Body&, Body&, CollisionInfo&);
 
-  gpm::Vector2F findClosestPointOnSegment(const gpm::Vector2F& a, const gpm::Vector2F& b, const gpm::Vector2F& p)
+  gpm::Vector2F findClosestPointOnSegment(const gpm::Vector2F& a, const gpm::Vector2F& ab, const gpm::Vector2F& p)
   {
-    const auto ab = b - a;
     const auto ap = p - a;
-
     const auto t = ap.getDotProduct(ab) / ab.getMagnitudeSquared();
 
     return gpm::Vector2F(a.x + ab.x * t, a.y + ab.y * t);
@@ -70,20 +69,48 @@ namespace pg
 
         const auto s1points = s1.getVertices(b1.getPosition(), b1.getOrientation());
         const auto s2points = s2.getVertices(b2.getPosition(), b2.getOrientation());
+        std::array<gpm::Vector2F, 4> s2lines;
+
+        for (unsigned int i = 0; i < 4; ++i) {
+          const auto& a = s2points[i];
+          const auto& b = s2points[(i + 1) % 4];
+
+          s2lines[i] = b - a;
+        }
 
         for (auto& p : s1points) {
           for (unsigned int i = 0; i < 4; ++i) {
-            const auto& a = s2points[i];
-            const auto& b = s2points[i == 3 ? 0 : i + 1];
-            const auto ab = b - a;
-            const auto ap = p - a;
+            {
+              const auto& a = s2points[i];
+              const auto& ab = s2lines[i];
+              const auto ap = p - a;
 
-            if (ab.getCrossProduct(ap).z >= 0) {
-              break;
+              if (ab.getCrossProduct(ap).z >= 0) {
+                break;
+              }
             }
 
             if (i == 3) {
-              
+              float minMagnitude = FLT_MAX;
+
+              for (unsigned int j = 0; j < 4; ++j) {
+                const auto& a = s2points[j];
+                const auto& ab = s2lines[j];
+
+                const auto closestPoint = findClosestPointOnSegment(a, ab, p);
+                const auto normal = closestPoint - p;
+
+                if (normal.getMagnitudeSquared() < minMagnitude) {
+                  minMagnitude = normal.getMagnitudeSquared();
+                  info.normal = normal;
+                  info.point = p;
+                }
+              }
+
+              info.penetrationDistance = std::sqrt(minMagnitude);
+              info.normal /= info.penetrationDistance;
+              info.bodyA = &b1;
+              info.bodyB = &b2;
 
               return true;
             }

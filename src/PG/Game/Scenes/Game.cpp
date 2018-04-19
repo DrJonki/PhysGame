@@ -38,13 +38,18 @@ namespace pg
       }*/
     }
 
+    const float e = 0.7f;
+
     auto& o1 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
     o1.setOrientation(gpm::pi_f / 6.f);
     o1.setPosition(gpm::Vector2F(levelSize.x / 2.f - 1.f, levelSize.y - 2));
+    o1.setElasticity(e);
 
     auto& o2 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
     o2.setPosition(gpm::Vector2F(levelSize.x / 2.f, levelSize.y - 16));
+    o2.setOrientation(gpm::pi_f * 0.05f);
     o2.setMass(-1.f);
+    o2.setElasticity(e);
   }
 
   void GameScene::update(const float dt)

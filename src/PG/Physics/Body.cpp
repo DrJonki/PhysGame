@@ -118,12 +118,6 @@ namespace pg
     return *this;
   }
 
-  Body & Body::applyImpulse(const gpm::Vector2F & impulse, const gpm::Vector2F & position)
-  {
-    // TODO
-    return *this;
-  }
-
   float Body::getTotalTorque() const
   {
     return m_torque;

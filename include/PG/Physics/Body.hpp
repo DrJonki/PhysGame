@@ -49,8 +49,6 @@ namespace pg
 
     Body& applyImpulse(const gpm::Vector2F& impulse);
 
-    Body& applyImpulse(const gpm::Vector2F& impulse, const gpm::Vector2F& position);
-
     float getTotalTorque() const;
 
     Body& applyTorque(const float torque);

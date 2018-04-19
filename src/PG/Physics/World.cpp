@@ -13,6 +13,11 @@ namespace
     std::hash<T> hasher;
     seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
   }*/
+
+  inline float perpDotProduct(const gpm::Vector2F& a, const gpm::Vector2F& b)
+  {
+    return a.x * b.y - a.y * b.x;
+  }
 }
 
 namespace pg
@@ -110,8 +115,21 @@ namespace pg
       const auto e = A->getElasticity() * B->getElasticity();
       const auto j = (-(1 + e) * vAB).getDotProduct(n) / n.getDotProduct(n * (A->getInverseMass() + B->getInverseMass()));
 
-      A->applyImpulse(j * n);
-      B->applyImpulse(-j * n);
+      if (A->isStatic()) {
+        B->setPosition(B->getPosition() + -pair.normal * pair.penetrationDistance);
+      }
+      else if (B->isStatic()) {
+        A->setPosition(A->getPosition() + pair.normal * pair.penetrationDistance);
+      }
+      else {
+        A->setPosition(A->getPosition() + pair.normal * pair.penetrationDistance * 0.5f);
+        B->setPosition(B->getPosition() + -pair.normal * pair.penetrationDistance * 0.5f);
+      }
+
+      A->applyImpulse(-j * n);
+      A->applyTorqueImpulse(perpDotProduct(info.point - A->getPosition(), j * info.normal));
+      B->applyImpulse(j * n);
+      B->applyTorqueImpulse(perpDotProduct(info.point - B->getPosition(), -j * info.normal));
     }
   }
 }
