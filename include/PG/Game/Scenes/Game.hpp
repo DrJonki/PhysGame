@@ -15,6 +15,8 @@ namespace pg
 
     void update(const float dt) override;
 
+    void onWindowEvent(const sf::Event& event) override;
+
   private:
 
     World m_world;

@@ -179,7 +179,7 @@ namespace pg
 
   float Body::getInverseInertia() const
   {
-    return 1.f / getInertia();
+    return isStatic() ? 0.f : 1.f / getInertia();
   }
 
   bool Body::isStatic() const

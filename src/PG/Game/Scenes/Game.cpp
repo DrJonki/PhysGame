@@ -4,6 +4,7 @@
 #include <PG/Game/Engine.hpp>
 #include <gpm/utility.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Window/Event.hpp>
 
 namespace pg
 {
@@ -38,7 +39,7 @@ namespace pg
       }*/
     }
 
-    const float e = 0.7f;
+    const float e = 0.42f;
 
     auto& o1 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
     o1.setOrientation(gpm::pi_f / 6.f);
@@ -50,6 +51,12 @@ namespace pg
     o2.setOrientation(gpm::pi_f * 0.05f);
     o2.setMass(-1.f);
     o2.setElasticity(e);
+
+    auto& o3 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
+    o3.setPosition(gpm::Vector2F(levelSize.x / 1.35f, levelSize.y - 32));
+    o3.setOrientation(gpm::pi_f * -0.05f);
+    o3.setMass(-1.f);
+    o3.setElasticity(e);
   }
 
   void GameScene::update(const float dt)
@@ -57,5 +64,14 @@ namespace pg
     m_world.step(dt);
 
     Scene::update(dt);
+  }
+
+  void GameScene::onWindowEvent(const sf::Event & event)
+  {
+    Scene::onWindowEvent(event);
+
+    if (event.type == sf::Event::EventType::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Button::Left) {
+      const auto worldPos = Engine::getWindow().mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+    }
   }
 }

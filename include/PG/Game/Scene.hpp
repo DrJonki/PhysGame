@@ -31,8 +31,6 @@ namespace pg
 
     virtual void draw(sf::RenderTarget& target);
 
-  private:
-
     virtual void onWindowEvent(const sf::Event& event);
 
   protected:

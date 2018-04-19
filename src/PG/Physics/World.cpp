@@ -111,25 +111,55 @@ namespace pg
       const auto vAP = p - A->getVelocity();
       const auto vBP = p - B->getVelocity();
       const auto vAB = vAP - vBP;
-
+      
       const auto e = A->getElasticity() * B->getElasticity();
-      const auto j = (-(1 + e) * vAB).getDotProduct(n) / n.getDotProduct(n * (A->getInverseMass() + B->getInverseMass()));
 
-      if (A->isStatic()) {
-        B->setPosition(B->getPosition() + -pair.normal * pair.penetrationDistance);
-      }
-      else if (B->isStatic()) {
-        A->setPosition(A->getPosition() + pair.normal * pair.penetrationDistance);
-      }
-      else {
-        A->setPosition(A->getPosition() + pair.normal * pair.penetrationDistance * 0.5f);
-        B->setPosition(B->getPosition() + -pair.normal * pair.penetrationDistance * 0.5f);
+      {
+        const auto j = (-(1 + e) * vAB).getDotProduct(n) / n.getDotProduct(n * (A->getInverseMass() + B->getInverseMass()));
+
+        if (A->isStatic()) {
+          B->setPosition(B->getPosition() + -pair.normal * pair.penetrationDistance);
+        }
+        else if (B->isStatic()) {
+          A->setPosition(A->getPosition() + pair.normal * pair.penetrationDistance);
+        }
+        else {
+          A->setPosition(A->getPosition() + pair.normal * pair.penetrationDistance * 0.5f);
+          B->setPosition(B->getPosition() + -pair.normal * pair.penetrationDistance * 0.5f);
+        }
+
+        A->applyImpulse(-j * n);
+        B->applyImpulse(j * n);
       }
 
-      A->applyImpulse(-j * n);
-      A->applyTorqueImpulse(perpDotProduct(info.point - A->getPosition(), j * info.normal));
-      B->applyImpulse(j * n);
-      B->applyTorqueImpulse(perpDotProduct(info.point - B->getPosition(), -j * info.normal));
+      {
+        const auto rAP = p - A->getPosition();
+        const auto rBP = p - B->getPosition();
+
+        const auto j =
+          // Numerator
+          (-(1 + e) * vAB).getDotProduct(n) /
+          
+          // Denominator
+          (
+            n.getDotProduct(n * (A->getInverseMass() + B->getInverseMass())) +
+            std::pow(perpDotProduct(rAP, n), 2.f) * A->getInverseInertia()   +
+            std::pow(perpDotProduct(rBP, n), 2.f) * B->getInverseInertia()
+          );
+
+        A->applyTorqueImpulse(perpDotProduct(p - A->getPosition(), j * n));
+        B->applyTorqueImpulse(perpDotProduct(p - B->getPosition(), -j * n));
+      }
+
+      {
+        A->onCollision(*B, info);
+
+        info.normal.negate();
+        info.bodyA = B;
+        info.bodyB = A;
+
+        B->onCollision(*A, info);
+      }
     }
   }
 }
