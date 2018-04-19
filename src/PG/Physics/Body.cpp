@@ -86,6 +86,10 @@ namespace pg
 
   Body & Body::setVelocity(const gpm::Vector2F & velocity)
   {
+    if (isStatic()) {
+      return *this;
+    }
+
     m_velocity = velocity;
     return *this;
   }
@@ -97,6 +101,10 @@ namespace pg
 
   Body & Body::setAngularVelocity(const float angularVelocity)
   {
+    if (isStatic()) {
+      return *this;
+    }
+
     m_angularVelocity = angularVelocity;
     return *this;
   }
@@ -108,12 +116,20 @@ namespace pg
 
   Body & Body::applyForce(const gpm::Vector2F & force)
   {
+    if (isStatic()) {
+      return *this;
+    }
+
     m_force += force;
     return *this;
   }
 
   Body & Body::applyImpulse(const gpm::Vector2F & impulse)
   {
+    if (isStatic()) {
+      return *this;
+    }
+
     m_velocity += impulse * getInverseMass();
     return *this;
   }
@@ -125,12 +141,20 @@ namespace pg
 
   Body & Body::applyTorque(const float torque)
   {
+    if (isStatic()) {
+      return *this;
+    }
+
     m_torque += torque;
     return *this;
   }
 
   Body & Body::applyTorqueImpulse(const float impulse)
   {
+    if (isStatic()) {
+      return *this;
+    }
+
     m_angularVelocity += getInverseInertia() * impulse;
     return *this;
   }
@@ -232,17 +256,6 @@ namespace pg
   const Shape * Body::getShape() const
   {
     return m_shapeRef;
-  }
-
-  gpm::Matrix3x3F Body::getTransform() const
-  {
-    const auto rot = m_targetOrientation;
-
-    return gpm::Matrix3x3F(
-      std::cos(rot), -std::sin(rot), m_targetPosition.x,
-      std::sin(rot),  std::cos(rot), m_targetPosition.y,
-      0.f,            0.f,           1.f
-    );
   }
 
   void Body::applyGravity()

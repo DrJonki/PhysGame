@@ -89,8 +89,6 @@ namespace pg
 
     const Shape* getShape() const;
 
-    gpm::Matrix3x3F getTransform() const;
-
   private:
 
     void applyGravity();

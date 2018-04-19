@@ -21,4 +21,17 @@ namespace pg
       std::abs(m_start.x - m_end.x), std::abs(m_start.y - m_end.y)
     );
   }
+
+  std::array<gpm::Vector2F, 2> LineSegmentShape::getVertices(const gpm::Vector2F& position, const float orientation) const
+  {
+    const auto mat = gpm::Matrix2x2F(
+      std::cos(orientation), -std::sin(orientation),
+      std::sin(orientation), std::cos(orientation)
+    );
+
+    return std::array<gpm::Vector2F, 2>({
+      position + m_start * mat,
+      position + m_end * mat,
+    });
+  }
 }

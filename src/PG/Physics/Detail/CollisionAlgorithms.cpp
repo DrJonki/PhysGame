@@ -59,7 +59,7 @@ namespace pg
       // Circle-Circle
       std::make_pair(std::type_index(typeid(CircleShape)), [](Body& b1, Body& b2, CollisionInfo& info)
       {
-        auto& s1 = static_cast<const CircleShape&>(*b1.getShape());
+        /*auto& s1 = static_cast<const CircleShape&>(*b1.getShape());
         auto& s2 = static_cast<const CircleShape&>(*b2.getShape());
 
         const auto distanceSq = (b2.getPosition() - b1.getPosition()).getMagnitudeSquared();
@@ -67,7 +67,7 @@ namespace pg
 
         if (distanceSq > radSumSq) {
           return false;
-        }
+        }*/
 
         return false;
       }),
@@ -148,8 +148,58 @@ namespace pg
       }),
 
       // Rectangle-LineSegment
-      std::make_pair(std::type_index(typeid(RectangleShape)), [](Body& b1, Body& b2, CollisionInfo& info)
+      std::make_pair(std::type_index(typeid(LineSegmentShape)), [](Body& b1, Body& b2, CollisionInfo& info)
       {
+        auto& s1 = static_cast<const RectangleShape&>(*b1.getShape());
+        auto& s2 = static_cast<const LineSegmentShape&>(*b2.getShape());
+
+        const auto s1points = s1.getVertices(b1.getPosition(), b1.getOrientation());
+        const auto s2points = s2.getVertices(b2.getPosition(), b2.getOrientation());
+        const auto lineStart = s2points[0];
+        const auto lineEnd = s2points[1];
+
+        for (int i = 0; i < 4; ++i) {
+          const auto& a = s1points[i];
+          const auto& b = s1points[(i + 1) % 4];
+          const auto& c = s1points[(i + 2) % 4];
+
+          if (segmentsIntersect(a, b, lineStart, lineEnd) && segmentsIntersect(b, c, lineStart, lineEnd)) {
+            const auto closestPoint = findClosestPointOnSegment(lineStart, lineEnd - lineStart, b);
+
+            info.normal = closestPoint - b;
+            info.penetrationDistance = std::sqrt(info.normal.getMagnitudeSquared());
+            info.normal.normalize();
+            info.point = closestPoint;
+            info.bodyA = &b1;
+            info.bodyB = &b2;
+
+            return true;
+          }
+        }
+
+        for (int i = 0; i < 4; ++i) {
+          const auto& a = s1points[i];
+          const auto& b = s1points[(i + 1) % 4];
+          const auto& c = s1points[(i + 2) % 4];
+
+          if (segmentsIntersect(a, b, lineStart, lineEnd) || segmentsIntersect(b, c, lineStart, lineEnd)) {
+            const float epsilon = 0.99f;
+
+            if (std::abs((b - a).getDotProduct(lineEnd - lineStart) >= epsilon || std::abs((b - c).getDotProduct(lineEnd - lineStart) >= epsilon))) {
+              const auto closestPoint = findClosestPointOnSegment(lineStart, lineEnd - lineStart, b1.getPosition());
+
+              info.normal = b1.getPosition() - closestPoint;
+              info.penetrationDistance = 0.01f;
+              info.normal.normalize();
+              info.point = closestPoint;
+              info.bodyA = &b1;
+              info.bodyB = &b2;
+
+              return true;
+            }
+          }
+        }
+
         return false;
       }),
     }))

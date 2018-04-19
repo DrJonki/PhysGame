@@ -71,6 +71,9 @@ set(SRC_GAME_ENTITIES
 
   ${INCDIR}/Game/Entities/Shot.hpp
   ${SRCDIR}/Game/Entities/Shot.cpp
+
+  ${INCDIR}/Game/Entities/Wall.hpp
+  ${SRCDIR}/Game/Entities/Wall.cpp
 )
 source_group("Game\\Entities" FILES ${SRC_GAME_ENTITIES})
 list(APPEND SRC_GAME ${SRC_GAME_ENTITIES})

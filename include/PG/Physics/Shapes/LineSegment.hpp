@@ -2,6 +2,7 @@
 
 #include <PG/Physics/Shape.hpp>
 #include <gpm/vector.hpp>
+#include <array>
 
 namespace pg
 {
@@ -14,6 +15,8 @@ namespace pg
     float getInertia(const float mass) const override;
 
     gpm::RectF getLocalAABB() const override;
+
+    std::array<gpm::Vector2F, 2> getVertices(const gpm::Vector2F& position, const float orientation) const;
 
   private:
 

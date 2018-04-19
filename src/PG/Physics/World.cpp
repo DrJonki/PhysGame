@@ -4,20 +4,41 @@
 #include <cassert>
 #include <algorithm>
 #include <vector>
+#include <unordered_set>
 
 namespace
 {
-  /*template<typename T>
+  template<typename T>
   inline void hash_combine(std::size_t& seed, const T& v)
   {
     std::hash<T> hasher;
     seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-  }*/
+  }
 
   inline float perpDotProduct(const gpm::Vector2F& a, const gpm::Vector2F& b)
   {
     return a.x * b.y - a.y * b.x;
   }
+}
+
+namespace std
+{
+  template<typename T1, typename T2>
+  struct hash<std::pair<T1, T2>>
+  {
+    std::size_t operator ()(const std::pair<T1, T2>& p) const
+    {
+      std::size_t seed1(0);
+      hash_combine(seed1, p.first);
+      hash_combine(seed1, p.second);
+
+      std::size_t seed2(0);
+      hash_combine(seed2, p.second);
+      hash_combine(seed2, p.first);
+
+      return std::min(seed1, seed2);
+    }
+  };
 }
 
 namespace pg
@@ -90,11 +111,14 @@ namespace pg
     std::vector<CollisionInfo> pairs;
     pairs.reserve(m_bodies.size());
 
-    CollisionInfo info;
+    std::unordered_set<std::pair<Body*, Body*>> saved;
 
+    CollisionInfo info;
+    
+    // TODO: detect which pairs have already been handled
     for (auto& i : m_bodies) {
       for (auto& j : m_bodies) {
-        if (i != j && i->checkCollision(*j, info)) {
+        if (i != j && !saved.count(std::make_pair(j, i)) && i->checkCollision(*j, info)) {
           pairs.push_back(info);
         }
       }
@@ -114,9 +138,8 @@ namespace pg
       
       const auto e = A->getElasticity() * B->getElasticity();
 
+      // Apply penetration correction
       {
-        const auto j = (-(1 + e) * vAB).getDotProduct(n) / n.getDotProduct(n * (A->getInverseMass() + B->getInverseMass()));
-
         if (A->isStatic()) {
           B->setPosition(B->getPosition() + -pair.normal * pair.penetrationDistance);
         }
@@ -127,18 +150,25 @@ namespace pg
           A->setPosition(A->getPosition() + pair.normal * pair.penetrationDistance * 0.5f);
           B->setPosition(B->getPosition() + -pair.normal * pair.penetrationDistance * 0.5f);
         }
+      }
+
+      const auto jNumerator = (-(1 + e) * vAB).getDotProduct(n);
+
+      // Apply linear impulse
+      {
+        const auto j = jNumerator / n.getDotProduct(n * (A->getInverseMass() + B->getInverseMass()));
 
         A->applyImpulse(-j * n);
         B->applyImpulse(j * n);
       }
 
+      // Apply angular impulse
       {
         const auto rAP = p - A->getPosition();
         const auto rBP = p - B->getPosition();
 
         const auto j =
-          // Numerator
-          (-(1 + e) * vAB).getDotProduct(n) /
+          jNumerator /
           
           // Denominator
           (
@@ -151,6 +181,7 @@ namespace pg
         B->applyTorqueImpulse(perpDotProduct(p - B->getPosition(), -j * n));
       }
 
+      // Invoke collision callbacks
       {
         A->onCollision(*B, info);
 

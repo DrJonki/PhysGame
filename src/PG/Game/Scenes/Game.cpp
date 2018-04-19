@@ -1,10 +1,12 @@
 #include <PG/Game/Scenes/Game.hpp>
 #include <PG/Game/Entities/Debris.hpp>
+#include <PG/Game/Entities/Wall.hpp>
 #include <PG/Game/Randomizer.hpp>
 #include <PG/Game/Engine.hpp>
 #include <gpm/utility.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Window/Event.hpp>
+#include <iostream>
 
 namespace pg
 {
@@ -39,17 +41,32 @@ namespace pg
       }*/
     }
 
-    const float e = 0.8f;
+    const float e = 0.4f;
 
-    auto& o1 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
+    // Create walls
+    {
+      /*auto& floor = addEntity(new WallEntity(m_world, gpm::Vector2F(0.f, 0.f), gpm::Vector2F(levelSize.x, 0.f)));
+      floor.setElasticity(e);*/
+
+      auto& left = addEntity(new WallEntity(m_world, gpm::Vector2F(0.f, 0.f), gpm::Vector2F(0.f, levelSize.y)));
+      left.setElasticity(e);
+
+      auto& right = addEntity(new WallEntity(m_world, gpm::Vector2F(levelSize.x, 0.f), gpm::Vector2F(levelSize.x, levelSize.y)));
+      right.setElasticity(e);
+
+      auto& ceil = addEntity(new WallEntity(m_world, gpm::Vector2F(0.f, levelSize.y), gpm::Vector2F(levelSize.x, levelSize.y)));
+      right.setElasticity(e);
+    }
+
+    auto& o1 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 6)));
     o1.setOrientation(gpm::pi_f / 6.f);
     o1.setPosition(gpm::Vector2F(levelSize.x / 2.f - 1.f, levelSize.y - 2));
     o1.setElasticity(e);
 
     auto& oo1 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
     oo1.setOrientation(gpm::pi_f / 6.f);
-    oo1.setPosition(gpm::Vector2F(levelSize.x / 2.f, levelSize.y - 50));
-    oo1.setVelocity(gpm::Vector2F(3.f, 22.f));
+    oo1.setPosition(gpm::Vector2F(levelSize.x / 2.f, levelSize.y - 48));
+    oo1.setVelocity(gpm::Vector2F(1.f, 35.f));
     oo1.setElasticity(e);
 
     auto& o2 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
@@ -71,17 +88,32 @@ namespace pg
 
     Scene::update(dt);
 
+    for (auto& entity : Scene::m_entities) {
+      auto body = dynamic_cast<DebrisEntity*>(entity.get());
 
+      if (body && body->getPosition().y < -15.f) {
+        body->erase();
+      }
+    }
   }
 
   void GameScene::onWindowEvent(const sf::Event & event)
   {
     Scene::onWindowEvent(event);
 
+    static Randomizer rand;
+
     if (event.type == sf::Event::EventType::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Button::Left) {
       const auto worldPos = Engine::getWindow().mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 
+      const auto size = gpm::Vector2F(rand(2.f, 8.f), rand(2.f, 8.f));
 
+      auto& entity = addEntity(new DebrisEntity(m_world, size));
+      entity.setMass(size.getMagnitude() / 5.f);
+      entity.setElasticity(rand(0.2f, 0.8f));
+      entity.setPosition(gpm::Vector2F(worldPos.x, -worldPos.y));
+      entity.setOrientation(rand(0.f, 2 * gpm::pi_f));
+      entity.setVelocity(gpm::Vector2F(rand(-4.f, 4.f), rand(10.f, 35.f)));
     }
   }
 }
