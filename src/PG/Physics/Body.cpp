@@ -18,6 +18,8 @@ namespace pg
   #endif
     , m_targetPosition()
     , m_targetOrientation(0.f)
+    , m_linearFactor(1.f, 1.f)
+    , m_angularFactor(1.f)
     , m_mass(mass)
     , m_gravityScale(1.f, 1.f)
     , m_force()
@@ -120,7 +122,7 @@ namespace pg
       return *this;
     }
 
-    m_force += force;
+    m_force += force * getLinearFactor();
     return *this;
   }
 
@@ -130,7 +132,7 @@ namespace pg
       return *this;
     }
 
-    m_velocity += impulse * getInverseMass();
+    m_velocity += impulse * getInverseMass() * getLinearFactor();
     return *this;
   }
 
@@ -145,7 +147,7 @@ namespace pg
       return *this;
     }
 
-    m_torque += torque;
+    m_torque += torque * getAngularFactor();
     return *this;
   }
 
@@ -155,7 +157,7 @@ namespace pg
       return *this;
     }
 
-    m_angularVelocity += getInverseInertia() * impulse;
+    m_angularVelocity += getInverseInertia() * impulse * getAngularFactor();
     return *this;
   }
 
@@ -256,6 +258,28 @@ namespace pg
   const Shape * Body::getShape() const
   {
     return m_shapeRef;
+  }
+
+  Body & Body::setLinearFactor(const gpm::Vector2F & factor)
+  {
+    m_linearFactor = factor;
+    return *this;
+  }
+
+  gpm::Vector2F Body::getLinearFactor() const
+  {
+    return m_linearFactor;
+  }
+
+  Body & Body::setAngularFactor(const float factor)
+  {
+    m_angularFactor = factor;
+    return *this;
+  }
+
+  float Body::getAngularFactor() const
+  {
+    return m_angularFactor;
   }
 
   void Body::applyGravity()

@@ -89,6 +89,14 @@ namespace pg
 
     const Shape* getShape() const;
 
+    Body& setLinearFactor(const gpm::Vector2F& factor);
+
+    gpm::Vector2F getLinearFactor() const;
+
+    Body& setAngularFactor(const float factor);
+
+    float getAngularFactor() const;
+
   private:
 
     void applyGravity();
@@ -116,6 +124,9 @@ namespace pg
 
     gpm::Vector2F m_targetPosition;
     float m_targetOrientation;
+
+    gpm::Vector2F m_linearFactor;
+    float m_angularFactor;
 
     float m_mass;
     gpm::Vector2F m_gravityScale;

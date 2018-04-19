@@ -147,8 +147,8 @@ namespace pg
           A->setPosition(A->getPosition() + pair.normal * pair.penetrationDistance);
         }
         else {
-          A->setPosition(A->getPosition() + pair.normal * pair.penetrationDistance * 0.5f);
-          B->setPosition(B->getPosition() + -pair.normal * pair.penetrationDistance * 0.5f);
+          A->setPosition(A->getPosition() + pair.normal * pair.penetrationDistance * 0.5f * A->getLinearFactor());
+          B->setPosition(B->getPosition() + -pair.normal * pair.penetrationDistance * 0.5f * B->getLinearFactor());
         }
       }
 

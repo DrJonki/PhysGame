@@ -8,7 +8,7 @@ namespace pg
   Engine* Engine::ms_instance = nullptr;
 
   Engine::Engine()
-    : m_window(sf::VideoMode(600, 800), "PhysGame")
+    : m_window(sf::VideoMode(800, 600), "PhysGame")
     , m_scenes()
     , m_running(true)
   {
