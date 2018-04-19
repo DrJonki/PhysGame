@@ -22,6 +22,35 @@ namespace pg
     return gpm::Vector2F(a.x + ab.x * t, a.y + ab.y * t);
   }
 
+  bool segmentsIntersect(const gpm::Vector2F& p1, const gpm::Vector2F& q1, const gpm::Vector2F& p2, const gpm::Vector2F& q2)
+  {
+    auto onSegment = [](const gpm::Vector2F& p, const gpm::Vector2F& q, const gpm::Vector2F& r)
+    {
+      return q.x <= std::max(p.x, r.x) && q.x >= std::min(p.x, r.x) && q.y <= std::max(p.y, r.y) && q.y >= std::min(p.y, r.y);
+    };
+    auto orientation = [](const gpm::Vector2F& p, const gpm::Vector2F& q, const gpm::Vector2F& r)
+    {
+      const int val = static_cast<int>((q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y));
+
+      if (val == 0) return 0;
+
+      return (val > 0) ? 1 : 2;
+    };
+
+    const auto o1 = orientation(p1, q1, p2);
+    const auto o2 = orientation(p1, q1, q2);
+    const auto o3 = orientation(p2, q2, p1);
+    const auto o4 = orientation(p2, q2, q1);
+
+    if (o1 != o2 && o3 != o4)
+      return true;
+
+    return (o1 == 0 && onSegment(p1, p2, q1))
+        || (o2 == 0 && onSegment(p1, q2, q1))
+        || (o3 == 0 && onSegment(p2, p1, q2))
+        || (o4 == 0 && onSegment(p2, q1, q2));
+  }
+
   std::unordered_map<std::type_index, std::unordered_map<std::type_index, CollisionAlgorithm>> ns_algorithms = {
 
     // Circle-X
@@ -91,23 +120,21 @@ namespace pg
             }
 
             if (i == 3) {
-              float minMagnitude = FLT_MAX;
-
               for (unsigned int j = 0; j < 4; ++j) {
                 const auto& a = s2points[j];
                 const auto& ab = s2lines[j];
 
-                const auto closestPoint = findClosestPointOnSegment(a, ab, p);
-                const auto normal = closestPoint - p;
+                if (segmentsIntersect(a, a + ab, b1.getPosition(), b2.getPosition())) {
+                  const auto closestPoint = findClosestPointOnSegment(a, ab, p);
 
-                if (normal.getMagnitudeSquared() < minMagnitude) {
-                  minMagnitude = normal.getMagnitudeSquared();
-                  info.normal = normal;
-                  info.point = p;
+                  info.normal = closestPoint - p;
+                  info.penetrationDistance = std::sqrt(info.normal.getMagnitudeSquared());
+                  info.point = closestPoint;
+
+                  break;
                 }
               }
 
-              info.penetrationDistance = std::sqrt(minMagnitude);
               info.normal /= info.penetrationDistance;
               info.bodyA = &b1;
               info.bodyB = &b2;

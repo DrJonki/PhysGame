@@ -39,12 +39,18 @@ namespace pg
       }*/
     }
 
-    const float e = 0.42f;
+    const float e = 0.8f;
 
     auto& o1 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
     o1.setOrientation(gpm::pi_f / 6.f);
     o1.setPosition(gpm::Vector2F(levelSize.x / 2.f - 1.f, levelSize.y - 2));
     o1.setElasticity(e);
+
+    auto& oo1 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
+    oo1.setOrientation(gpm::pi_f / 6.f);
+    oo1.setPosition(gpm::Vector2F(levelSize.x / 2.f, levelSize.y - 50));
+    oo1.setVelocity(gpm::Vector2F(3.f, 22.f));
+    oo1.setElasticity(e);
 
     auto& o2 = addEntity(new DebrisEntity(m_world, gpm::Vector2F(4, 4)));
     o2.setPosition(gpm::Vector2F(levelSize.x / 2.f, levelSize.y - 16));
@@ -64,6 +70,8 @@ namespace pg
     m_world.step(dt);
 
     Scene::update(dt);
+
+
   }
 
   void GameScene::onWindowEvent(const sf::Event & event)
@@ -72,6 +80,8 @@ namespace pg
 
     if (event.type == sf::Event::EventType::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Button::Left) {
       const auto worldPos = Engine::getWindow().mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+
     }
   }
 }
